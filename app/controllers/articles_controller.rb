@@ -1,11 +1,13 @@
 class ArticlesController < ApplicationController
+  before_action :set_user, only: %w[:show :edit :update :destroy]
+  before_action :authenticate_member!, except: %w[:index :show]
+  before_action :configure_permitted_parameters, if: :devise_controller?
 
   def index
     @articles = Article.all
   end
 
   def show
-    @article = Article.find(params[:id])
   end
 
   def new
@@ -23,11 +25,9 @@ class ArticlesController < ApplicationController
   end
 
   def edit
-    @article = Article.find(params[:id])
   end
 
   def update
-    @article = Article.find(params[:id])
     if @article.update(article_params)
       redirect_to @article
     else
@@ -36,9 +36,7 @@ class ArticlesController < ApplicationController
   end
 
   def destroy
-    @article = Article.find(params[:id])
     @article.destroy
-
     redirect_to articles_path
   end
 
@@ -50,5 +48,9 @@ class ArticlesController < ApplicationController
 
   def article_params
     params.require(:article).permit(:title, :text)
+  end
+
+  def configure_permitted_parameters
+    devise_parameter_sanitizer.permit(:sign_up, keys: [:full_name])
   end
 end
